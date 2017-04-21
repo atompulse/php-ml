@@ -14,9 +14,26 @@ Fresh approach to Machine Learning in PHP. Algorithms, Cross Validation, Neural 
 
 ## This version of PHP-ML requires PHP 5.6
 The code is transpiled using (https://github.com/spatie/7to5)
-## Why do this?
+* Why do this?
 This package is amazing and I believe there is no reason why
 should not be available also for php 5.6
+* How to install
+** Add to composer as:
+---
+"php-ai/php-ml": "dev-master"
+---
+** Add Repository of type VCS in your composer:
+---
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/atompulse/php-ml-56",
+      "no-api": true
+    }
+  ],
+---
+
+
 
 
 Simple example of classification:
@@ -36,14 +53,6 @@ $classifier->predict([3, 2]);
 ## Documentation
 
 To find out how to use PHP-ML follow [Documentation](http://php-ml.readthedocs.org/).
-
-## Installation
-
-Currently this library is in the process of developing, but You can install it with Composer:
-
-```
-composer require php-ai/php-ml
-```
 
 ## Examples
 
