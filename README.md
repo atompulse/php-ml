@@ -12,7 +12,12 @@
 
 Fresh approach to Machine Learning in PHP. Algorithms, Cross Validation, Neural Network, Preprocessing, Feature Extraction and much more in one library.
 
-PHP-ML requires PHP >= 7.0.
+## This version of PHP-ML requires PHP 5.6
+The code is transpiled using (https://github.com/spatie/7to5)
+## Why do this?
+This package is amazing and I believe there is no reason why
+should not be available also for php 5.6
+
 
 Simple example of classification:
 ```php

@@ -1,11 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\NeuralNetwork\ActivationFunction;
 
 use Phpml\NeuralNetwork\ActivationFunction;
-
 class BinaryStep implements ActivationFunction
 {
     /**
@@ -13,7 +10,7 @@ class BinaryStep implements ActivationFunction
      *
      * @return float
      */
-    public function compute($value): float
+    public function compute($value)
     {
         return $value >= 0 ? 1.0 : 0.0;
     }

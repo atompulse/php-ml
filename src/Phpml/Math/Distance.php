@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\Math;
 
 interface Distance
@@ -12,5 +10,5 @@ interface Distance
      *
      * @return float
      */
-    public function distance(array $a, array $b): float;
+    public function distance(array $a, array $b);
 }

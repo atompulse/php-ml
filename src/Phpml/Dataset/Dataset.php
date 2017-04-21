@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\Dataset;
 
 interface Dataset
@@ -9,10 +7,9 @@ interface Dataset
     /**
      * @return array
      */
-    public function getSamples(): array;
-
+    public function getSamples();
     /**
      * @return array
      */
-    public function getTargets(): array;
+    public function getTargets();
 }

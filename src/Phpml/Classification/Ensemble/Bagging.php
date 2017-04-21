@@ -1,62 +1,43 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\Classification\Ensemble;
 
 use Phpml\Helper\Predictable;
 use Phpml\Helper\Trainable;
 use Phpml\Classification\Classifier;
 use Phpml\Classification\DecisionTree;
-
 class Bagging implements Classifier
 {
     use Trainable, Predictable;
-
     /**
      * @var int
      */
     protected $numSamples;
 
     /**
-     * @var array
-     */
-    private $targets = [];
-
-    /**
      * @var int
      */
     protected $featureCount = 0;
-
     /**
      * @var int
      */
     protected $numClassifier;
-
     /**
      * @var Classifier
      */
     protected $classifier = DecisionTree::class;
-
     /**
      * @var array
      */
     protected $classifierOptions = ['depth' => 20];
-
     /**
      * @var array
      */
     protected $classifiers;
-
     /**
      * @var float
      */
     protected $subsetRatio = 0.7;
-
-    /**
-     * @var array
-     */
-    private $samples = [];
 
     /**
      * Creates an ensemble classifier with given number of base classifiers<br>
@@ -69,7 +50,6 @@ class Bagging implements Classifier
     {
         $this->numClassifier = $numClassifier;
     }
-
     /**
      * This method determines the ratio of samples used to create the 'bootstrap' subset,
      * e.g., random samples drawn from the original dataset with replacement (allow repeats),
@@ -79,7 +59,7 @@ class Bagging implements Classifier
      * @return $this
      * @throws Exception
      */
-    public function setSubsetRatio(float $ratio)
+    public function setSubsetRatio($ratio)
     {
         if ($ratio < 0.1 || $ratio > 1.0) {
             throw new \Exception("Subset ratio should be between 0.1 and 1.0");
@@ -87,7 +67,6 @@ class Bagging implements Classifier
         $this->subsetRatio = $ratio;
         return $this;
     }
-
     /**
      * This method is used to set the base classifier. Default value is
      * DecisionTree::class, but any class that implements the <i>Classifier</i>
@@ -100,13 +79,12 @@ class Bagging implements Classifier
      * @param array $classifierOptions
      * @return $this
      */
-    public function setClassifer(string $classifier, array $classifierOptions = [])
+    public function setClassifer($classifier, array $classifierOptions = [])
     {
         $this->classifier = $classifier;
         $this->classifierOptions = $classifierOptions;
         return $this;
     }
-
     /**
      * @param array $samples
      * @param array $targets
@@ -117,7 +95,6 @@ class Bagging implements Classifier
         $this->targets = array_merge($this->targets, $targets);
         $this->featureCount = count($samples[0]);
         $this->numSamples = count($this->samples);
-
         // Init classifiers and train them with bootstrap samples
         $this->classifiers = $this->initClassifiers();
         $index = 0;
@@ -127,32 +104,30 @@ class Bagging implements Classifier
             ++$index;
         }
     }
-
     /**
      * @param int $index
      * @return array
      */
-    protected function getRandomSubset(int $index)
+    protected function getRandomSubset($index)
     {
         $samples = [];
         $targets = [];
         srand($index);
         $bootstrapSize = $this->subsetRatio * $this->numSamples;
-        for ($i=0; $i < $bootstrapSize; $i++) {
+        for ($i = 0; $i < $bootstrapSize; $i++) {
             $rand = rand(0, $this->numSamples - 1);
             $samples[] = $this->samples[$rand];
             $targets[] = $this->targets[$rand];
         }
         return [$samples, $targets];
     }
-
     /**
      * @return array
      */
     protected function initClassifiers()
     {
         $classifiers = [];
-        for ($i=0; $i<$this->numClassifier; $i++) {
+        for ($i = 0; $i < $this->numClassifier; $i++) {
             $ref = new \ReflectionClass($this->classifier);
             if ($this->classifierOptions) {
                 $obj = $ref->newInstanceArgs($this->classifierOptions);
@@ -163,7 +138,6 @@ class Bagging implements Classifier
         }
         return $classifiers;
     }
-
     /**
      * @param Classifier $classifier
      * @param int $index
@@ -173,7 +147,6 @@ class Bagging implements Classifier
     {
         return $classifier;
     }
-
     /**
      * @param array $sample
      * @return mixed
@@ -185,7 +158,6 @@ class Bagging implements Classifier
             /* @var $classifier Classifier */
             $predictions[] = $classifier->predict($sample);
         }
-
         $counts = array_count_values($predictions);
         arsort($counts);
         reset($counts);

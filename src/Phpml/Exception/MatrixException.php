@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\Exception;
 
 class MatrixException extends \Exception
@@ -13,7 +11,6 @@ class MatrixException extends \Exception
     {
         return new self('Matrix is not square matrix');
     }
-
     /**
      * @return MatrixException
      */
@@ -21,7 +18,6 @@ class MatrixException extends \Exception
     {
         return new self('Column out of range');
     }
-
     /**
      * @return MatrixException
      */

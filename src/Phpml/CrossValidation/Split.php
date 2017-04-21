@@ -1,34 +1,27 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\CrossValidation;
 
 use Phpml\Dataset\Dataset;
 use Phpml\Exception\InvalidArgumentException;
-
 abstract class Split
 {
     /**
      * @var array
      */
     protected $trainSamples = [];
-
     /**
      * @var array
      */
     protected $testSamples = [];
-
     /**
      * @var array
      */
     protected $trainLabels = [];
-
     /**
      * @var array
      */
     protected $testLabels = [];
-
     /**
      * @param Dataset $dataset
      * @param float   $testSize
@@ -36,18 +29,15 @@ abstract class Split
      *
      * @throws InvalidArgumentException
      */
-    public function __construct(Dataset $dataset, float $testSize = 0.3, int $seed = null)
+    public function __construct(Dataset $dataset, $testSize = 0.3, $seed = null)
     {
         if (0 >= $testSize || 1 <= $testSize) {
             throw InvalidArgumentException::percentNotInRange('testSize');
         }
         $this->seedGenerator($seed);
-
         $this->splitDataset($dataset, $testSize);
     }
-
-    abstract protected function splitDataset(Dataset $dataset, float $testSize);
-
+    protected abstract function splitDataset(Dataset $dataset, $testSize);
     /**
      * @return array
      */
@@ -55,7 +45,6 @@ abstract class Split
     {
         return $this->trainSamples;
     }
-
     /**
      * @return array
      */
@@ -63,7 +52,6 @@ abstract class Split
     {
         return $this->testSamples;
     }
-
     /**
      * @return array
      */
@@ -71,7 +59,6 @@ abstract class Split
     {
         return $this->trainLabels;
     }
-
     /**
      * @return array
      */
@@ -79,11 +66,10 @@ abstract class Split
     {
         return $this->testLabels;
     }
-
     /**
      * @param int|null $seed
      */
-    protected function seedGenerator(int $seed = null)
+    protected function seedGenerator($seed = null)
     {
         if (null === $seed) {
             mt_srand();

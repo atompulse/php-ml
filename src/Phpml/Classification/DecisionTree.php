@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\Classification;
 
 use Phpml\Exception\InvalidArgumentException;
@@ -9,73 +7,59 @@ use Phpml\Helper\Predictable;
 use Phpml\Helper\Trainable;
 use Phpml\Math\Statistic\Mean;
 use Phpml\Classification\DecisionTree\DecisionTreeLeaf;
-
 class DecisionTree implements Classifier
 {
     use Trainable, Predictable;
-
     const CONTINUOUS = 1;
     const NOMINAL = 2;
-
     /**
      * @var array
      */
     protected $columnTypes;
-
     /**
      * @var array
      */
     private $labels = [];
-
     /**
      * @var int
      */
     private $featureCount = 0;
-
     /**
      * @var DecisionTreeLeaf
      */
     protected $tree = null;
-
     /**
      * @var int
      */
     protected $maxDepth;
-
     /**
      * @var int
      */
     public $actualDepth = 0;
-
     /**
      * @var int
      */
     private $numUsableFeatures = 0;
-
     /**
      * @var array
      */
     private $selectedFeatures;
-
     /**
      * @var array
      */
     private $featureImportances = null;
-
     /**
      *
      * @var array
      */
     private $columnNames = null;
-
     /**
      * @param int $maxDepth
      */
-    public function __construct(int $maxDepth = 10)
+    public function __construct($maxDepth = 10)
     {
         $this->maxDepth = $maxDepth;
     }
-
     /**
      * @param array $samples
      * @param array $targets
@@ -84,16 +68,13 @@ class DecisionTree implements Classifier
     {
         $this->samples = array_merge($this->samples, $samples);
         $this->targets = array_merge($this->targets, $targets);
-
         $this->featureCount = count($this->samples[0]);
         $this->columnTypes = self::getColumnTypes($this->samples);
         $this->labels = array_keys(array_count_values($this->targets));
         $this->tree = $this->getSplitLeaf(range(0, count($this->samples) - 1));
-
         // Each time the tree is trained, feature importances are reset so that
         // we will have to compute it again depending on the new data
         $this->featureImportances = null;
-
         // If column names are given or computed before, then there is no
         // need to init it and accidentally remove the previous given names
         if ($this->columnNames === null) {
@@ -101,50 +82,44 @@ class DecisionTree implements Classifier
         } elseif (count($this->columnNames) > $this->featureCount) {
             $this->columnNames = array_slice($this->columnNames, 0, $this->featureCount);
         } elseif (count($this->columnNames) < $this->featureCount) {
-            $this->columnNames = array_merge($this->columnNames,
-                range(count($this->columnNames), $this->featureCount - 1));
+            $this->columnNames = array_merge($this->columnNames, range(count($this->columnNames), $this->featureCount - 1));
         }
     }
-
     /**
      * @param array $samples
      * @return array
      */
-    public static function getColumnTypes(array $samples) : array
+    public static function getColumnTypes(array $samples)
     {
         $types = [];
         $featureCount = count($samples[0]);
-        for ($i=0; $i < $featureCount; $i++) {
+        for ($i = 0; $i < $featureCount; $i++) {
             $values = array_column($samples, $i);
             $isCategorical = self::isCategoricalColumn($values);
             $types[] = $isCategorical ? self::NOMINAL : self::CONTINUOUS;
         }
-
         return $types;
     }
-
     /**
      * @param array $records
      * @param int $depth
      * @return DecisionTreeLeaf
      */
-    protected function getSplitLeaf(array $records, int $depth = 0) : DecisionTreeLeaf
+    protected function getSplitLeaf(array $records, $depth = 0)
     {
         $split = $this->getBestSplit($records);
         $split->level = $depth;
         if ($this->actualDepth < $depth) {
             $this->actualDepth = $depth;
         }
-
         // Traverse all records to see if all records belong to the same class,
         // otherwise group the records so that we can classify the leaf
         // in case maximum depth is reached
         $leftRecords = [];
-        $rightRecords= [];
+        $rightRecords = [];
         $remainingTargets = [];
         $prevRecord = null;
         $allSame = true;
-
         foreach ($records as $recordNo) {
             // Check if the previous record is the same with the current one
             $record = $this->samples[$recordNo];
@@ -152,24 +127,21 @@ class DecisionTree implements Classifier
                 $allSame = false;
             }
             $prevRecord = $record;
-
             // According to the split criteron, this record will
             // belong to either left or the right side in the next split
             if ($split->evaluate($record)) {
                 $leftRecords[] = $recordNo;
             } else {
-                $rightRecords[]= $recordNo;
+                $rightRecords[] = $recordNo;
             }
-
             // Group remaining targets
             $target = $this->targets[$recordNo];
-            if (! array_key_exists($target, $remainingTargets)) {
+            if (!array_key_exists($target, $remainingTargets)) {
                 $remainingTargets[$target] = 1;
             } else {
                 $remainingTargets[$target]++;
             }
         }
-
         if ($allSame || $depth >= $this->maxDepth || count($remainingTargets) === 1) {
             $split->isTerminal = 1;
             arsort($remainingTargets);
@@ -179,18 +151,16 @@ class DecisionTree implements Classifier
                 $split->leftLeaf = $this->getSplitLeaf($leftRecords, $depth + 1);
             }
             if ($rightRecords) {
-                $split->rightLeaf= $this->getSplitLeaf($rightRecords, $depth + 1);
+                $split->rightLeaf = $this->getSplitLeaf($rightRecords, $depth + 1);
             }
         }
-
         return $split;
     }
-
     /**
      * @param array $records
      * @return DecisionTreeLeaf
      */
-    protected function getBestSplit(array $records) : DecisionTreeLeaf
+    protected function getBestSplit(array $records)
     {
         $targets = array_intersect_key($this->targets, array_flip($records));
         $samples = array_intersect_key($this->samples, array_flip($records));
@@ -214,25 +184,21 @@ class DecisionTree implements Classifier
                 $split->columnIndex = $i;
                 $split->isContinuous = $this->columnTypes[$i] == self::CONTINUOUS;
                 $split->records = $records;
-
                 // If a numeric column is to be selected, then
                 // the original numeric value and the selected operator
                 // will also be saved into the leaf for future access
                 if ($this->columnTypes[$i] == self::CONTINUOUS) {
                     $matches = [];
-                    preg_match("/^([<>=]{1,2})\s*(.*)/", strval($split->value), $matches);
+                    preg_match("/^([<>=]{1,2})\\s*(.*)/", strval($split->value), $matches);
                     $split->operator = $matches[1];
                     $split->numericValue = floatval($matches[2]);
                 }
-
                 $bestSplit = $split;
                 $bestGiniVal = $gini;
             }
         }
-
         return $bestSplit;
     }
-
     /**
      * Returns available features/columns to the tree for the decision making
      * process. <br>
@@ -248,17 +214,15 @@ class DecisionTree implements Classifier
      *
      * @return array
      */
-    protected function getSelectedFeatures() : array
+    protected function getSelectedFeatures()
     {
         $allFeatures = range(0, $this->featureCount - 1);
-        if ($this->numUsableFeatures === 0 && ! $this->selectedFeatures) {
+        if ($this->numUsableFeatures === 0 && !$this->selectedFeatures) {
             return $allFeatures;
         }
-
         if ($this->selectedFeatures) {
             return $this->selectedFeatures;
         }
-
         $numFeatures = $this->numUsableFeatures;
         if ($numFeatures > $this->featureCount) {
             $numFeatures = $this->featureCount;
@@ -266,17 +230,15 @@ class DecisionTree implements Classifier
         shuffle($allFeatures);
         $selectedFeatures = array_slice($allFeatures, 0, $numFeatures, false);
         sort($selectedFeatures);
-
         return $selectedFeatures;
     }
-
     /**
      * @param $baseValue
      * @param array $colValues
      * @param array $targets
      * @return float
      */
-    public function getGiniIndex($baseValue, array $colValues, array $targets) : float
+    public function getGiniIndex($baseValue, array $colValues, array $targets)
     {
         $countMatrix = [];
         foreach ($this->labels as $label) {
@@ -288,7 +250,7 @@ class DecisionTree implements Classifier
             $countMatrix[$label][$rowIndex]++;
         }
         $giniParts = [0, 0];
-        for ($i=0; $i<=1; $i++) {
+        for ($i = 0; $i <= 1; $i++) {
             $part = 0;
             $sum = array_sum(array_column($countMatrix, $i));
             if ($sum > 0) {
@@ -298,28 +260,26 @@ class DecisionTree implements Classifier
             }
             $giniParts[$i] = (1 - $part) * $sum;
         }
-
         return array_sum($giniParts) / count($colValues);
     }
-
     /**
      * @param array $samples
      * @return array
      */
-    protected function preprocess(array $samples) : array
+    protected function preprocess(array $samples)
     {
         // Detect and convert continuous data column values into
         // discrete values by using the median as a threshold value
         $columns = [];
-        for ($i=0; $i<$this->featureCount; $i++) {
+        for ($i = 0; $i < $this->featureCount; $i++) {
             $values = array_column($samples, $i);
             if ($this->columnTypes[$i] == self::CONTINUOUS) {
                 $median = Mean::median($values);
                 foreach ($values as &$value) {
                     if ($value <= $median) {
-                        $value = "<= $median";
+                        $value = "<= {$median}";
                     } else {
-                        $value = "> $median";
+                        $value = "> {$median}";
                     }
                 }
             }
@@ -329,15 +289,13 @@ class DecisionTree implements Classifier
         // to get the transpose of a 2D array
         return array_map(null, ...$columns);
     }
-
     /**
      * @param array $columnValues
      * @return bool
      */
-    protected static function isCategoricalColumn(array $columnValues) : bool
+    protected static function isCategoricalColumn(array $columnValues)
     {
         $count = count($columnValues);
-
         // There are two main indicators that *may* show whether a
         // column is composed of discrete set of values:
         // 1- Column may contain string values and non-float values
@@ -351,12 +309,9 @@ class DecisionTree implements Classifier
         if (count($numericValues) !== $count) {
             return true;
         }
-
         $distinctValues = array_count_values($columnValues);
-
         return count($distinctValues) <= $count / 5;
     }
-
     /**
      * This method is used to set number of columns to be used
      * when deciding a split at an internal node of the tree.  <br>
@@ -368,17 +323,14 @@ class DecisionTree implements Classifier
      * @return $this
      * @throws InvalidArgumentException
      */
-    public function setNumFeatures(int $numFeatures)
+    public function setNumFeatures($numFeatures)
     {
         if ($numFeatures < 0) {
             throw new InvalidArgumentException('Selected column count should be greater or equal to zero');
         }
-
         $this->numUsableFeatures = $numFeatures;
-
         return $this;
     }
-
     /**
      * Used to set predefined features to consider while deciding which column to use for a split
      *
@@ -388,7 +340,6 @@ class DecisionTree implements Classifier
     {
         $this->selectedFeatures = $selectedFeatures;
     }
-
     /**
      * A string array to represent columns. Useful when HTML output or
      * column importances are desired to be inspected.
@@ -402,12 +353,9 @@ class DecisionTree implements Classifier
         if ($this->featureCount !== 0 && count($names) !== $this->featureCount) {
             throw new InvalidArgumentException(sprintf('Length of the given array should be equal to feature count %s', $this->featureCount));
         }
-
         $this->columnNames = $names;
-
         return $this;
     }
-
     /**
      * @return string
      */
@@ -415,7 +363,6 @@ class DecisionTree implements Classifier
     {
         return $this->tree->getHTML($this->columnNames);
     }
-
     /**
      * This will return an array including an importance value for
      * each column in the given dataset. The importance values are
@@ -428,20 +375,16 @@ class DecisionTree implements Classifier
         if ($this->featureImportances !== null) {
             return $this->featureImportances;
         }
-
         $sampleCount = count($this->samples);
         $this->featureImportances = [];
         foreach ($this->columnNames as $column => $columnName) {
             $nodes = $this->getSplitNodesByColumn($column, $this->tree);
-
             $importance = 0;
             foreach ($nodes as $node) {
                 $importance += $node->getNodeImpurityDecrease($sampleCount);
             }
-
             $this->featureImportances[$columnName] = $importance;
         }
-
         // Normalize & sort the importances
         $total = array_sum($this->featureImportances);
         if ($total > 0) {
@@ -450,10 +393,8 @@ class DecisionTree implements Classifier
             }
             arsort($this->featureImportances);
         }
-
         return $this->featureImportances;
     }
-
     /**
      * Collects and returns an array of internal nodes that use the given
      * column as a split criterion
@@ -462,17 +403,15 @@ class DecisionTree implements Classifier
      * @param DecisionTreeLeaf $node
      * @return array
      */
-    protected function getSplitNodesByColumn(int $column, DecisionTreeLeaf $node) : array
+    protected function getSplitNodesByColumn($column, DecisionTreeLeaf $node)
     {
         if (!$node || $node->isTerminal) {
             return [];
         }
-
         $nodes = [];
         if ($node->columnIndex === $column) {
             $nodes[] = $node;
         }
-
         $lNodes = [];
         $rNodes = [];
         if ($node->leftLeaf) {
@@ -482,10 +421,8 @@ class DecisionTree implements Classifier
             $rNodes = $this->getSplitNodesByColumn($column, $node->rightLeaf);
         }
         $nodes = array_merge($nodes, $lNodes, $rNodes);
-
         return $nodes;
     }
-
     /**
      * @param array $sample
      * @return mixed
@@ -503,7 +440,6 @@ class DecisionTree implements Classifier
                 $node = $node->rightLeaf;
             }
         } while ($node);
-
         return $node ? $node->classValue : $this->labels[0];
     }
 }

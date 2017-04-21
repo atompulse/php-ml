@@ -1,11 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\Math\Statistic;
 
 use Phpml\Exception\InvalidArgumentException;
-
 class Correlation
 {
     /**
@@ -21,25 +18,20 @@ class Correlation
         if (count($x) !== count($y)) {
             throw InvalidArgumentException::arraySizeNotMatch();
         }
-
         $count = count($x);
         $meanX = Mean::arithmetic($x);
         $meanY = Mean::arithmetic($y);
-
         $axb = 0;
         $a2 = 0;
         $b2 = 0;
-
         for ($i = 0; $i < $count; ++$i) {
             $a = $x[$i] - $meanX;
             $b = $y[$i] - $meanY;
-            $axb += ($a * $b);
+            $axb += $a * $b;
             $a2 += pow($a, 2);
             $b2 += pow($b, 2);
         }
-
-        $corr = $axb / sqrt((float) ($a2 * $b2));
-
+        $corr = $axb / sqrt((double) ($a2 * $b2));
         return $corr;
     }
 }

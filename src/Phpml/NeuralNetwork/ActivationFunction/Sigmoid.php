@@ -1,18 +1,14 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\NeuralNetwork\ActivationFunction;
 
 use Phpml\NeuralNetwork\ActivationFunction;
-
 class Sigmoid implements ActivationFunction
 {
     /**
      * @var float
      */
     private $beta;
-
     /**
      * @param float $beta
      */
@@ -20,13 +16,12 @@ class Sigmoid implements ActivationFunction
     {
         $this->beta = $beta;
     }
-
     /**
      * @param float|int $value
      *
      * @return float
      */
-    public function compute($value): float
+    public function compute($value)
     {
         return 1 / (1 + exp(-$this->beta * $value));
     }
