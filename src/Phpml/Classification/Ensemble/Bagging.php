@@ -13,7 +13,6 @@ class Bagging implements Classifier
      * @var int
      */
     protected $numSamples;
-
     /**
      * @var int
      */
@@ -38,7 +37,6 @@ class Bagging implements Classifier
      * @var float
      */
     protected $subsetRatio = 0.7;
-
     /**
      * Creates an ensemble classifier with given number of base classifiers<br>
      * Default number of base classifiers is 100.

@@ -66,7 +66,6 @@ class SupportVectorMachine
      * @var string
      */
     private $model;
-
     /**
      * @param int        $type
      * @param int        $kernel
