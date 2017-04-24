@@ -19,11 +19,13 @@ This package is amazing and I believe there is no reason why
 should not be available also for php 5.6
 * How to install
 * Add to composer as:
----
+
+```
 "php-ai/php-ml": "dev-master"
----
+```
+
 * Add Repository of type VCS in your composer:
----
+```
   "repositories": [
     {
       "type": "vcs",
@@ -31,6 +33,7 @@ should not be available also for php 5.6
       "no-api": true
     }
   ],
+```
 ---
 
 
