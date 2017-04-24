@@ -18,11 +18,11 @@ The code is transpiled using (https://github.com/spatie/7to5)
 This package is amazing and I believe there is no reason why
 should not be available also for php 5.6
 * How to install
-** Add to composer as:
+* Add to composer as:
 ---
 "php-ai/php-ml": "dev-master"
 ---
-** Add Repository of type VCS in your composer:
+* Add Repository of type VCS in your composer:
 ---
   "repositories": [
     {
