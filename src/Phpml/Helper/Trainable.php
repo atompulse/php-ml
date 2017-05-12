@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\Helper;
 
 trait Trainable
@@ -10,12 +8,10 @@ trait Trainable
      * @var array
      */
     private $samples = [];
-
     /**
      * @var array
      */
     private $targets = [];
-
     /**
      * @param array $samples
      * @param array $targets

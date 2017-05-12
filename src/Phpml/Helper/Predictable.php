@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\Helper;
 
 trait Predictable
@@ -21,14 +19,12 @@ trait Predictable
                 $predicted[$index] = $this->predictSample($sample);
             }
         }
-
         return $predicted;
     }
-
     /**
      * @param array $sample
      *
      * @return mixed
      */
-    abstract protected function predictSample(array $sample);
+    protected abstract function predictSample(array $sample);
 }

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\Helper\Optimizer;
 
 /**
@@ -31,37 +29,27 @@ class ConjugateGradient extends GD
         $this->gradientCb = $gradientCb;
         $this->sampleCount = count($samples);
         $this->costValues = [];
-
         $d = mp::muls($this->gradient($this->theta), -1);
-
-        for ($i=0; $i < $this->maxIterations; $i++) {
+        for ($i = 0; $i < $this->maxIterations; $i++) {
             // Obtain α that minimizes f(θ + α.d)
             $alpha = $this->getAlpha(array_sum($d));
-
             // θ(k+1) = θ(k) + α.d
             $thetaNew = $this->getNewTheta($alpha, $d);
-
             // β = ||∇f(x(k+1))||²  ∕  ||∇f(x(k))||²
             $beta = $this->getBeta($thetaNew);
-
             // d(k+1) =–∇f(x(k+1)) + β(k).d(k)
             $d = $this->getNewDirection($thetaNew, $beta, $d);
-
             // Save values for the next iteration
             $oldTheta = $this->theta;
             $this->costValues[] = $this->cost($thetaNew);
-
             $this->theta = $thetaNew;
             if ($this->enableEarlyStop && $this->earlyStop($oldTheta)) {
                 break;
             }
         }
-
         $this->clear();
-
         return $this->theta;
     }
-
     /**
      * Executes the callback function for the problem and returns
      * sum of the gradient for all samples & targets.
@@ -73,10 +61,8 @@ class ConjugateGradient extends GD
     protected function gradient(array $theta)
     {
         list($_, $gradient, $_) = parent::gradient($theta);
-
         return $gradient;
     }
-
     /**
      * Returns the value of f(x) for given solution
      *
@@ -87,10 +73,8 @@ class ConjugateGradient extends GD
     protected function cost(array $theta)
     {
         list($cost, $_, $_) = parent::gradient($theta);
-
         return array_sum($cost) / $this->sampleCount;
     }
-
     /**
      * Calculates alpha that minimizes the function f(θ + α.d)
      * by performing a line search that does not rely upon the derivation.
@@ -109,45 +93,39 @@ class ConjugateGradient extends GD
      *
      * @return array
      */
-    protected function getAlpha(float $d)
+    protected function getAlpha($d)
     {
         $small = 0.0001 * $d;
         $large = 0.01 * $d;
-
         // Obtain θ + α.d for two initial values, x0 and x1
         $x0 = mp::adds($this->theta, $small);
         $x1 = mp::adds($this->theta, $large);
-
         $epsilon = 0.0001;
         $iteration = 0;
         do {
             $fx1 = $this->cost($x1);
             $fx0 = $this->cost($x0);
-
             // If the difference between two values is small enough
             // then break the loop
             if (abs($fx1 - $fx0) <= $epsilon) {
                 break;
             }
-
             if ($fx1 < $fx0) {
                 $x0 = $x1;
-                $x1 = mp::adds($x1, 0.01); // Enlarge second
+                $x1 = mp::adds($x1, 0.01);
+                // Enlarge second
             } else {
                 $x1 = mp::divs(mp::add($x1, $x0), 2.0);
-            } // Get to the midpoint
-
+            }
+            // Get to the midpoint
             $error = $fx1 / $this->dimensions;
         } while ($error <= $epsilon || $iteration++ < 10);
-
         //  Return α = θ / d
         if ($d == 0) {
             return $x1[0] - $this->theta[0];
         }
-
         return ($x1[0] - $this->theta[0]) / $d;
     }
-
     /**
      * Calculates new set of solutions with given alpha (for each θ(k)) and
      * gradient direction.
@@ -159,11 +137,10 @@ class ConjugateGradient extends GD
      *
      * return array
      */
-    protected function getNewTheta(float $alpha, array $d)
+    protected function getNewTheta($alpha, array $d)
     {
         $theta = $this->theta;
-
-        for ($i=0; $i < $this->dimensions + 1; $i++) {
+        for ($i = 0; $i < $this->dimensions + 1; $i++) {
             if ($i == 0) {
                 $theta[$i] += $alpha * array_sum($d);
             } else {
@@ -171,14 +148,11 @@ class ConjugateGradient extends GD
                 foreach ($this->samples as $si => $sample) {
                     $sum += $sample[$i - 1] * $d[$si] * $alpha;
                 }
-
                 $theta[$i] += $sum;
             }
         }
-
         return $theta;
     }
-
     /**
      * Calculates new beta (β) for given set of solutions by using
      * Fletcher–Reeves method.
@@ -195,11 +169,9 @@ class ConjugateGradient extends GD
     protected function getBeta(array $newTheta)
     {
         $dNew = array_sum($this->gradient($newTheta));
-        $dOld = array_sum($this->gradient($this->theta)) + 1e-100;
-
-        return  $dNew ** 2 / $dOld ** 2;
+        $dOld = array_sum($this->gradient($this->theta)) + 1.0E-100;
+        return $dNew ** 2 / $dOld ** 2;
     }
-
     /**
      * Calculates the new conjugate direction
      *
@@ -211,14 +183,12 @@ class ConjugateGradient extends GD
      *
      * @return array
      */
-    protected function getNewDirection(array $theta, float $beta, array $d)
+    protected function getNewDirection(array $theta, $beta, array $d)
     {
         $grad = $this->gradient($theta);
-
         return mp::add(mp::muls($grad, -1), mp::muls($d, $beta));
     }
 }
-
 /**
  * Handles element-wise vector operations between vector-vector
  * and vector-scalar variables
@@ -239,10 +209,8 @@ class mp
         foreach ($m1 as $i => $val) {
             $res[] = $val * $m2[$i];
         }
-
         return $res;
     }
-
     /**
      * Element-wise <b>division</b> of two vectors of the same size
      *
@@ -257,10 +225,8 @@ class mp
         foreach ($m1 as $i => $val) {
             $res[] = $val / $m2[$i];
         }
-
         return $res;
     }
-
     /**
      * Element-wise <b>addition</b> of two vectors of the same size
      *
@@ -275,10 +241,8 @@ class mp
         foreach ($m1 as $i => $val) {
             $res[] = $val + $mag * $m2[$i];
         }
-
         return $res;
     }
-
     /**
      * Element-wise <b>subtraction</b> of two vectors of the same size
      *
@@ -291,7 +255,6 @@ class mp
     {
         return self::add($m1, $m2, -1);
     }
-
     /**
      * Element-wise <b>multiplication</b> of a vector with a scalar
      *
@@ -300,16 +263,14 @@ class mp
      *
      * @return array
      */
-    public static function muls(array $m1, float $m2)
+    public static function muls(array $m1, $m2)
     {
         $res = [];
         foreach ($m1 as $val) {
             $res[] = $val * $m2;
         }
-
         return $res;
     }
-
     /**
      * Element-wise <b>division</b> of a vector with a scalar
      *
@@ -318,16 +279,14 @@ class mp
      *
      * @return array
      */
-    public static function divs(array $m1, float $m2)
+    public static function divs(array $m1, $m2)
     {
         $res = [];
         foreach ($m1 as $val) {
-            $res[] = $val / ($m2 + 1e-32);
+            $res[] = $val / ($m2 + 1.0E-32);
         }
-
         return $res;
     }
-
     /**
      * Element-wise <b>addition</b> of a vector with a scalar
      *
@@ -336,16 +295,14 @@ class mp
      *
      * @return array
      */
-    public static function adds(array $m1, float $m2, $mag = 1)
+    public static function adds(array $m1, $m2, $mag = 1)
     {
         $res = [];
         foreach ($m1 as $val) {
             $res[] = $val + $mag * $m2;
         }
-
         return $res;
     }
-
     /**
      * Element-wise <b>subtraction</b> of a vector with a scalar
      *

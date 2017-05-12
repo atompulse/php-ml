@@ -1,53 +1,43 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\Preprocessing;
 
 use Phpml\Exception\NormalizerException;
 use Phpml\Math\Statistic\StandardDeviation;
 use Phpml\Math\Statistic\Mean;
-
 class Normalizer implements Preprocessor
 {
     const NORM_L1 = 1;
     const NORM_L2 = 2;
-    const NORM_STD= 3;
-
+    const NORM_STD = 3;
     /**
      * @var int
      */
     private $norm;
-
     /**
      * @var bool
      */
     private $fitted = false;
-
     /**
      * @var array
      */
     private $std;
-
     /**
      * @var array
      */
     private $mean;
-
     /**
      * @param int $norm
      *
      * @throws NormalizerException
      */
-    public function __construct(int $norm = self::NORM_L2)
+    public function __construct($norm = self::NORM_L2)
     {
         if (!in_array($norm, [self::NORM_L1, self::NORM_L2, self::NORM_STD])) {
             throw NormalizerException::unknownNorm();
         }
-
         $this->norm = $norm;
     }
-
     /**
      * @param array $samples
      */
@@ -56,7 +46,6 @@ class Normalizer implements Preprocessor
         if ($this->fitted) {
             return;
         }
-
         if ($this->norm == self::NORM_STD) {
             $features = range(0, count($samples[0]) - 1);
             foreach ($features as $i) {
@@ -65,29 +54,20 @@ class Normalizer implements Preprocessor
                 $this->mean[$i] = Mean::arithmetic($values);
             }
         }
-
         $this->fitted = true;
     }
-
     /**
      * @param array $samples
      */
     public function transform(array &$samples)
     {
-        $methods = [
-            self::NORM_L1 => 'normalizeL1',
-            self::NORM_L2 => 'normalizeL2',
-            self::NORM_STD=> 'normalizeSTD'
-        ];
+        $methods = [self::NORM_L1 => 'normalizeL1', self::NORM_L2 => 'normalizeL2', self::NORM_STD => 'normalizeSTD'];
         $method = $methods[$this->norm];
-
         $this->fit($samples);
-
         foreach ($samples as &$sample) {
-            $this->$method($sample);
+            $this->{$method}($sample);
         }
     }
-
     /**
      * @param array $sample
      */
@@ -97,7 +77,6 @@ class Normalizer implements Preprocessor
         foreach ($sample as $feature) {
             $norm1 += abs($feature);
         }
-
         if (0 == $norm1) {
             $count = count($sample);
             $sample = array_fill(0, $count, 1.0 / $count);
@@ -107,7 +86,6 @@ class Normalizer implements Preprocessor
             }
         }
     }
-
     /**
      * @param array $sample
      */
@@ -117,8 +95,7 @@ class Normalizer implements Preprocessor
         foreach ($sample as $feature) {
             $norm2 += $feature * $feature;
         }
-        $norm2 = sqrt((float)$norm2);
-
+        $norm2 = sqrt((double) $norm2);
         if (0 == $norm2) {
             $sample = array_fill(0, count($sample), 1);
         } else {
@@ -127,7 +104,6 @@ class Normalizer implements Preprocessor
             }
         }
     }
-
     /**
      * @param array $sample
      */

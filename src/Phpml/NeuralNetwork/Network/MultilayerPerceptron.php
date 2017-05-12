@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\NeuralNetwork\Network;
 
 use Phpml\Exception\InvalidArgumentException;
@@ -11,7 +9,6 @@ use Phpml\NeuralNetwork\Node\Bias;
 use Phpml\NeuralNetwork\Node\Input;
 use Phpml\NeuralNetwork\Node\Neuron;
 use Phpml\NeuralNetwork\Node\Neuron\Synapse;
-
 class MultilayerPerceptron extends LayeredNetwork
 {
     /**
@@ -25,21 +22,18 @@ class MultilayerPerceptron extends LayeredNetwork
         if (count($layers) < 2) {
             throw InvalidArgumentException::invalidLayersNumber();
         }
-
         $this->addInputLayer(array_shift($layers));
         $this->addNeuronLayers($layers, $activationFunction);
         $this->addBiasNodes();
         $this->generateSynapses();
     }
-
     /**
      * @param int $nodes
      */
-    private function addInputLayer(int $nodes)
+    private function addInputLayer($nodes)
     {
         $this->addLayer(new Layer($nodes, Input::class));
     }
-
     /**
      * @param array                   $layers
      * @param ActivationFunction|null $activationFunction
@@ -50,7 +44,6 @@ class MultilayerPerceptron extends LayeredNetwork
             $this->addLayer(new Layer($neurons, Neuron::class, $activationFunction));
         }
     }
-
     private function generateSynapses()
     {
         $layersNumber = count($this->layers) - 1;
@@ -60,7 +53,6 @@ class MultilayerPerceptron extends LayeredNetwork
             $this->generateLayerSynapses($nextLayer, $currentLayer);
         }
     }
-
     private function addBiasNodes()
     {
         $biasLayers = count($this->layers) - 1;
@@ -68,7 +60,6 @@ class MultilayerPerceptron extends LayeredNetwork
             $this->layers[$i]->addNode(new Bias());
         }
     }
-
     /**
      * @param Layer $nextLayer
      * @param Layer $currentLayer
@@ -81,7 +72,6 @@ class MultilayerPerceptron extends LayeredNetwork
             }
         }
     }
-
     /**
      * @param Layer  $currentLayer
      * @param Neuron $nextNeuron

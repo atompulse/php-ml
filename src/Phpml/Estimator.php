@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml;
 
 interface Estimator
@@ -11,7 +9,6 @@ interface Estimator
      * @param array $targets
      */
     public function train(array $samples, array $targets);
-
     /**
      * @param array $samples
      *

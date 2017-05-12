@@ -1,23 +1,18 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\Clustering\KMeans;
 
 use ArrayAccess;
-
 class Point implements ArrayAccess
 {
     /**
      * @var int
      */
     protected $dimension;
-
     /**
      * @var array
      */
     protected $coordinates;
-
     /**
      * @param array $coordinates
      */
@@ -26,7 +21,6 @@ class Point implements ArrayAccess
         $this->dimension = count($coordinates);
         $this->coordinates = $coordinates;
     }
-
     /**
      * @return array
      */
@@ -34,7 +28,6 @@ class Point implements ArrayAccess
     {
         return $this->coordinates;
     }
-
     /**
      * @param Point $point
      * @param bool  $precise
@@ -48,10 +41,8 @@ class Point implements ArrayAccess
             $difference = $this->coordinates[$n] - $point->coordinates[$n];
             $distance += $difference * $difference;
         }
-
-        return $precise ? sqrt((float) $distance) : $distance;
+        return $precise ? sqrt((double) $distance) : $distance;
     }
-
     /**
      * @param array $points
      *
@@ -61,22 +52,18 @@ class Point implements ArrayAccess
     {
         foreach ($points as $point) {
             $distance = $this->getDistanceWith($point, false);
-
             if (!isset($minDistance)) {
                 $minDistance = $distance;
                 $minPoint = $point;
                 continue;
             }
-
             if ($distance < $minDistance) {
                 $minDistance = $distance;
                 $minPoint = $point;
             }
         }
-
         return $minPoint;
     }
-
     /**
      * @return array
      */
@@ -84,7 +71,6 @@ class Point implements ArrayAccess
     {
         return $this->coordinates;
     }
-
     /**
      * @param mixed $offset
      *
@@ -94,7 +80,6 @@ class Point implements ArrayAccess
     {
         return isset($this->coordinates[$offset]);
     }
-
     /**
      * @param mixed $offset
      *
@@ -104,7 +89,6 @@ class Point implements ArrayAccess
     {
         return $this->coordinates[$offset];
     }
-
     /**
      * @param mixed $offset
      * @param mixed $value
@@ -113,7 +97,6 @@ class Point implements ArrayAccess
     {
         $this->coordinates[$offset] = $value;
     }
-
     /**
      * @param mixed $offset
      */

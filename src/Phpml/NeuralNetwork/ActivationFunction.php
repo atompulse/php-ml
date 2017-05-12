@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\NeuralNetwork;
 
 interface ActivationFunction
@@ -11,5 +9,5 @@ interface ActivationFunction
      *
      * @return float
      */
-    public function compute($value): float;
+    public function compute($value);
 }
