@@ -66,7 +66,6 @@ class SupportVectorMachine
      * @var string
      */
     private $model;
-
     /**
      * @param int        $type
      * @param int        $kernel
@@ -102,7 +101,7 @@ class SupportVectorMachine
     /**
      * @param string $binPath
      */
-    public function setBinPath(string $binPath)
+    public function setBinPath($binPath)
     {
         $this->binPath = $binPath;
         return $this;

@@ -1,13 +1,10 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\DimensionReduction;
 
 use Phpml\Math\Statistic\Covariance;
 use Phpml\Math\Statistic\Mean;
 use Phpml\Math\Matrix;
-
 class PCA extends EigenTransformerBase
 {
     /**
@@ -16,12 +13,10 @@ class PCA extends EigenTransformerBase
      * @var array
      */
     protected $means = [];
-
     /**
      * @var bool
      */
     protected $fit = false;
-
     /**
      * PCA (Principal Component Analysis) used to explain given
      * data with lower number of dimensions. This analysis transforms the
@@ -44,7 +39,6 @@ class PCA extends EigenTransformerBase
         if ($totalVariance !== null && $numFeatures !== null) {
             throw new \Exception("Either totalVariance or numFeatures should be specified in order to run the algorithm");
         }
-
         if ($numFeatures !== null) {
             $this->numFeatures = $numFeatures;
         }
@@ -52,7 +46,6 @@ class PCA extends EigenTransformerBase
             $this->totalVariance = $totalVariance;
         }
     }
-
     /**
      * Takes a data and returns a lower dimensional version
      * of this data while preserving $totalVariance or $numFeatures. <br>
@@ -66,32 +59,25 @@ class PCA extends EigenTransformerBase
     public function fit(array $data)
     {
         $n = count($data[0]);
-
         $data = $this->normalize($data, $n);
-
         $covMatrix = Covariance::covarianceMatrix($data, array_fill(0, $n, 0));
-
         $this->eigenDecomposition($covMatrix);
-
         $this->fit = true;
-
         return $this->reduce($data);
     }
-
     /**
      * @param array $data
      * @param int $n
      */
-    protected function calculateMeans(array $data, int $n)
+    protected function calculateMeans(array $data, $n)
     {
         // Calculate means for each dimension
         $this->means = [];
-        for ($i=0; $i < $n; $i++) {
+        for ($i = 0; $i < $n; $i++) {
             $column = array_column($data, $i);
             $this->means[] = Mean::arithmetic($column);
         }
     }
-
     /**
      * Normalization of the data includes subtracting mean from
      * each dimension therefore dimensions will be centered to zero
@@ -101,22 +87,19 @@ class PCA extends EigenTransformerBase
      *
      * @return array
      */
-    protected function normalize(array $data, int $n)
+    protected function normalize(array $data, $n)
     {
         if (empty($this->means)) {
             $this->calculateMeans($data, $n);
         }
-
         // Normalize data
         foreach ($data as $i => $row) {
-            for ($k=0; $k < $n; $k++) {
+            for ($k = 0; $k < $n; $k++) {
                 $data[$i][$k] -= $this->means[$k];
             }
         }
-
         return $data;
     }
-
     /**
      * Transforms the given sample to a lower dimensional vector by using
      * the eigenVectors obtained in the last run of <code>fit</code>.
@@ -130,13 +113,10 @@ class PCA extends EigenTransformerBase
         if (!$this->fit) {
             throw new \Exception("PCA has not been fitted with respect to original dataset, please run PCA::fit() first");
         }
-
-        if (! is_array($sample[0])) {
+        if (!is_array($sample[0])) {
             $sample = [$sample];
         }
-
         $sample = $this->normalize($sample, count($sample[0]));
-
         return $this->reduce($sample);
     }
 }

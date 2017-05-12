@@ -1,42 +1,35 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\Math;
 
 use Phpml\Math\LinearAlgebra\LUDecomposition;
 use Phpml\Exception\InvalidArgumentException;
 use Phpml\Exception\MatrixException;
-
 class Matrix
 {
     /**
      * @var array
      */
     private $matrix;
-
     /**
      * @var int
      */
     private $rows;
-
     /**
      * @var int
      */
     private $columns;
-
     /**
      * @var float
      */
     private $determinant;
-
     /**
      * @param array $matrix
      * @param bool  $validate
      *
      * @throws InvalidArgumentException
      */
-    public function __construct(array $matrix, bool $validate = true)
+    public function __construct(array $matrix, $validate = true)
     {
         // When a row vector is given
         if (!is_array($matrix[0])) {
@@ -47,7 +40,6 @@ class Matrix
             $this->rows = count($matrix);
             $this->columns = count($matrix[0]);
         }
-
         if ($validate) {
             for ($i = 0; $i < $this->rows; ++$i) {
                 if (count($matrix[$i]) !== $this->columns) {
@@ -55,10 +47,8 @@ class Matrix
                 }
             }
         }
-
         $this->matrix = $matrix;
     }
-
     /**
      * @param array $array
      *
@@ -70,10 +60,8 @@ class Matrix
         foreach ($array as $value) {
             $matrix[] = [$value];
         }
-
         return new self($matrix);
     }
-
     /**
      * @return array
      */
@@ -81,7 +69,6 @@ class Matrix
     {
         return $this->matrix;
     }
-
     /**
      * @return float
      */
@@ -89,7 +76,6 @@ class Matrix
     {
         return $this->matrix[0][0];
     }
-
     /**
      * @return int
      */
@@ -97,7 +83,6 @@ class Matrix
     {
         return $this->rows;
     }
-
     /**
      * @return int
      */
@@ -105,7 +90,6 @@ class Matrix
     {
         return $this->columns;
     }
-
     /**
      * @param $column
      *
@@ -118,11 +102,8 @@ class Matrix
         if ($column >= $this->columns) {
             throw MatrixException::columnOutOfRange();
         }
-
         return array_column($this->matrix, $column);
     }
-
-
     /**
      * @return float|int
      *
@@ -133,15 +114,12 @@ class Matrix
         if ($this->determinant) {
             return $this->determinant;
         }
-
         if (!$this->isSquare()) {
             throw MatrixException::notSquareMatrix();
         }
-
         $lu = new LUDecomposition($this);
         return $this->determinant = $lu->det();
     }
-
     /**
      * @return bool
      */
@@ -149,7 +127,6 @@ class Matrix
     {
         return $this->columns === $this->rows;
     }
-
     /**
      * @return Matrix
      */
@@ -162,10 +139,8 @@ class Matrix
         } else {
             $matrix = array_map(null, ...$this->matrix);
         }
-
         return new self($matrix, false);
     }
-
     /**
      * @param Matrix $matrix
      *
@@ -178,7 +153,6 @@ class Matrix
         if ($this->columns != $matrix->getRows()) {
             throw InvalidArgumentException::inconsistentMatrixSupplied();
         }
-
         $product = [];
         $multiplier = $matrix->toArray();
         for ($i = 0; $i < $this->rows; ++$i) {
@@ -190,10 +164,8 @@ class Matrix
                 }
             }
         }
-
         return new self($product, false);
     }
-
     /**
      * @param $value
      *
@@ -207,10 +179,8 @@ class Matrix
                 $newMatrix[$i][$j] = $this->matrix[$i][$j] / $value;
             }
         }
-
         return new self($newMatrix, false);
     }
-
     /**
      * @param $value
      *
@@ -224,10 +194,8 @@ class Matrix
                 $newMatrix[$i][$j] = $this->matrix[$i][$j] * $value;
             }
         }
-
         return new self($newMatrix, false);
     }
-
     /**
      * Element-wise addition of the matrix with another one
      *
@@ -237,7 +205,6 @@ class Matrix
     {
         return $this->_add($other);
     }
-
     /**
      * Element-wise subtracting of another matrix from this one
      *
@@ -247,7 +214,6 @@ class Matrix
     {
         return $this->_add($other, -1);
     }
-
     /**
      * Element-wise addition or substraction depending on the given sign parameter
      *
@@ -258,17 +224,14 @@ class Matrix
     {
         $a1 = $this->toArray();
         $a2 = $other->toArray();
-
         $newMatrix = [];
-        for ($i=0; $i < $this->rows; $i++) {
-            for ($k=0; $k < $this->columns; $k++) {
+        for ($i = 0; $i < $this->rows; $i++) {
+            for ($k = 0; $k < $this->columns; $k++) {
                 $newMatrix[$i][$k] = $a1[$i][$k] + $sign * $a2[$i][$k];
             }
         }
-
         return new Matrix($newMatrix, false);
     }
-
     /**
      * @return Matrix
      *
@@ -279,14 +242,11 @@ class Matrix
         if (!$this->isSquare()) {
             throw MatrixException::notSquareMatrix();
         }
-
         $LU = new LUDecomposition($this);
         $identity = $this->getIdentity();
         $inverse = $LU->solve($identity);
-
         return new self($inverse, false);
     }
-
     /**
      * Returns diagonal identity matrix of the same size of this matrix
      *
@@ -295,20 +255,18 @@ class Matrix
     protected function getIdentity()
     {
         $array = array_fill(0, $this->rows, array_fill(0, $this->columns, 0));
-        for ($i=0; $i < $this->rows; $i++) {
+        for ($i = 0; $i < $this->rows; $i++) {
             $array[$i][$i] = 1;
         }
-
         return new self($array, false);
     }
-
     /**
      * @param int $row
      * @param int $column
      *
      * @return Matrix
      */
-    public function crossOut(int $row, int $column)
+    public function crossOut($row, $column)
     {
         $newMatrix = [];
         $r = 0;
@@ -324,18 +282,15 @@ class Matrix
                 ++$r;
             }
         }
-
         return new self($newMatrix, false);
     }
-
     /**
      * @return bool
      */
-    public function isSingular() : bool
+    public function isSingular()
     {
         return 0 == $this->getDeterminant();
     }
-
     /**
      * Returns the transpose of given array
      *
@@ -347,7 +302,6 @@ class Matrix
     {
         return (new Matrix($array, false))->transpose()->toArray();
     }
-
     /**
      * Returns the dot product of two arrays<br>
      * Matrix::dot(x, y) ==> x.y'
@@ -361,7 +315,6 @@ class Matrix
     {
         $m1 = new Matrix($array1, false);
         $m2 = new Matrix($array2, false);
-
         return $m1->multiply($m2->transpose())->toArray()[0];
     }
 }
