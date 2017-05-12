@@ -66,10 +66,7 @@ class SupportVectorMachine
      * @var string
      */
     private $model;
-    /**
-     * @var array
-     */
-    private $targets = [];
+
     /**
      * @param int        $type
      * @param int        $kernel
