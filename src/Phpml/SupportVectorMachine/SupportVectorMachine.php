@@ -99,6 +99,22 @@ class SupportVectorMachine
         $this->varPath = $rootPath . 'var' . DIRECTORY_SEPARATOR;
     }
     /**
+     * @param string $binPath
+     */
+    public function setBinPath($binPath)
+    {
+        $this->binPath = $binPath;
+        return $this;
+    }
+    /**
+     * @param string $varPath
+     */
+    public function setVarPath($varPath)
+    {
+        $this->varPath = $varPath;
+        return $this;
+    }
+    /**
      * @param array $samples
      * @param array $targets
      */

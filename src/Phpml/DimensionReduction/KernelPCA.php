@@ -73,7 +73,7 @@ class KernelPCA extends PCA
         }
         $matrix = $this->calculateKernelMatrix($this->data, $numRows);
         $matrix = $this->centerMatrix($matrix, $numRows);
-        list($this->eigValues, $this->eigVectors) = $this->eigenDecomposition($matrix, $numRows);
+        $this->eigenDecomposition($matrix, $numRows);
         $this->fit = true;
         return Matrix::transposeArray($this->eigVectors);
     }

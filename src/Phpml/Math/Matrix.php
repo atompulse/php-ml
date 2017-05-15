@@ -2,6 +2,7 @@
 
 namespace Phpml\Math;
 
+use Phpml\Math\LinearAlgebra\LUDecomposition;
 use Phpml\Exception\InvalidArgumentException;
 use Phpml\Exception\MatrixException;
 class Matrix
@@ -116,28 +117,8 @@ class Matrix
         if (!$this->isSquare()) {
             throw MatrixException::notSquareMatrix();
         }
-        return $this->determinant = $this->calculateDeterminant();
-    }
-    /**
-     * @return float|int
-     *
-     * @throws MatrixException
-     */
-    private function calculateDeterminant()
-    {
-        $determinant = 0;
-        if ($this->rows == 1 && $this->columns == 1) {
-            $determinant = $this->matrix[0][0];
-        } elseif ($this->rows == 2 && $this->columns == 2) {
-            $determinant = $this->matrix[0][0] * $this->matrix[1][1] - $this->matrix[0][1] * $this->matrix[1][0];
-        } else {
-            for ($j = 0; $j < $this->columns; ++$j) {
-                $subMatrix = $this->crossOut(0, $j);
-                $minor = $this->matrix[0][$j] * $subMatrix->getDeterminant();
-                $determinant += fmod((double) $j, 2.0) == 0 ? $minor : -$minor;
-            }
-        }
-        return $determinant;
+        $lu = new LUDecomposition($this);
+        return $this->determinant = $lu->det();
     }
     /**
      * @return bool
@@ -261,18 +242,23 @@ class Matrix
         if (!$this->isSquare()) {
             throw MatrixException::notSquareMatrix();
         }
-        if ($this->isSingular()) {
-            throw MatrixException::singularMatrix();
+        $LU = new LUDecomposition($this);
+        $identity = $this->getIdentity();
+        $inverse = $LU->solve($identity);
+        return new self($inverse, false);
+    }
+    /**
+     * Returns diagonal identity matrix of the same size of this matrix
+     *
+     * @return Matrix
+     */
+    protected function getIdentity()
+    {
+        $array = array_fill(0, $this->rows, array_fill(0, $this->columns, 0));
+        for ($i = 0; $i < $this->rows; $i++) {
+            $array[$i][$i] = 1;
         }
-        $newMatrix = [];
-        for ($i = 0; $i < $this->rows; ++$i) {
-            for ($j = 0; $j < $this->columns; ++$j) {
-                $minor = $this->crossOut($i, $j)->getDeterminant();
-                $newMatrix[$i][$j] = fmod((double) ($i + $j), 2.0) == 0 ? $minor : -$minor;
-            }
-        }
-        $cofactorMatrix = new self($newMatrix, false);
-        return $cofactorMatrix->transpose()->divideByScalar($this->getDeterminant());
+        return new self($array, false);
     }
     /**
      * @param int $row

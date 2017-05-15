@@ -2,42 +2,17 @@
 
 namespace Phpml\DimensionReduction;
 
-use Phpml\Math\LinearAlgebra\EigenvalueDecomposition;
 use Phpml\Math\Statistic\Covariance;
 use Phpml\Math\Statistic\Mean;
 use Phpml\Math\Matrix;
-class PCA
+class PCA extends EigenTransformerBase
 {
-    /**
-     * Total variance to be conserved after the reduction
-     *
-     * @var float
-     */
-    public $totalVariance = 0.9;
-    /**
-     * Number of features to be preserved after the reduction
-     *
-     * @var int
-     */
-    public $numFeatures = null;
     /**
      * Temporary storage for mean values for each dimension in given data
      *
      * @var array
      */
     protected $means = [];
-    /**
-     * Eigenvectors of the covariance matrix
-     *
-     * @var array
-     */
-    protected $eigVectors = [];
-    /**
-     * Top eigenValues of the covariance matrix
-     *
-     * @var type
-     */
-    protected $eigValues = [];
     /**
      * @var bool
      */
@@ -86,7 +61,7 @@ class PCA
         $n = count($data[0]);
         $data = $this->normalize($data, $n);
         $covMatrix = Covariance::covarianceMatrix($data, array_fill(0, $n, 0));
-        list($this->eigValues, $this->eigVectors) = $this->eigenDecomposition($covMatrix, $n);
+        $this->eigenDecomposition($covMatrix);
         $this->fit = true;
         return $this->reduce($data);
     }
@@ -124,56 +99,6 @@ class PCA
             }
         }
         return $data;
-    }
-    /**
-     * Calculates eigenValues and eigenVectors of the given matrix. Returns
-     * top eigenVectors along with the largest eigenValues. The total explained variance
-     * of these eigenVectors will be no less than desired $totalVariance value
-     *
-     * @param array $matrix
-     * @param int $n
-     *
-     * @return array
-     */
-    protected function eigenDecomposition(array $matrix, $n)
-    {
-        $eig = new EigenvalueDecomposition($matrix);
-        $eigVals = $eig->getRealEigenvalues();
-        $eigVects = $eig->getEigenvectors();
-        $totalEigVal = array_sum($eigVals);
-        // Sort eigenvalues in descending order
-        arsort($eigVals);
-        $explainedVar = 0.0;
-        $vectors = [];
-        $values = [];
-        foreach ($eigVals as $i => $eigVal) {
-            $explainedVar += $eigVal / $totalEigVal;
-            $vectors[] = $eigVects[$i];
-            $values[] = $eigVal;
-            if ($this->numFeatures !== null) {
-                if (count($vectors) == $this->numFeatures) {
-                    break;
-                }
-            } else {
-                if ($explainedVar >= $this->totalVariance) {
-                    break;
-                }
-            }
-        }
-        return [$values, $vectors];
-    }
-    /**
-     * Returns the reduced data
-     *
-     * @param array $data
-     *
-     * @return array
-     */
-    protected function reduce(array $data)
-    {
-        $m1 = new Matrix($data);
-        $m2 = new Matrix($this->eigVectors);
-        return $m1->multiply($m2->transpose())->toArray();
     }
     /**
      * Transforms the given sample to a lower dimensional vector by using
