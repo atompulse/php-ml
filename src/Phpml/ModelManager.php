@@ -8,7 +8,8 @@ class ModelManager
 {
     /**
      * @param Estimator $estimator
-     * @param string $filepath
+     * @param string    $filepath
+     *
      * @throws FileException
      * @throws SerializeException
      */
@@ -19,7 +20,7 @@ class ModelManager
         }
         $serialized = serialize($estimator);
         if (empty($serialized)) {
-            throw SerializeException::cantSerialize(get_type($estimator));
+            throw SerializeException::cantSerialize(gettype($estimator));
         }
         $result = file_put_contents($filepath, $serialized, LOCK_EX);
         if ($result === false) {
@@ -28,7 +29,9 @@ class ModelManager
     }
     /**
      * @param string $filepath
+     *
      * @return Estimator
+     *
      * @throws FileException
      * @throws SerializeException
      */

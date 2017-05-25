@@ -26,7 +26,7 @@ class Gaussian
      *
      * @param float $value
      *
-     * @return type
+     * @return float|int
      */
     public function pdf($value)
     {

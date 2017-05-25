@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phpml\Math\Statistic;
 
 use Phpml\Exception\InvalidArgumentException;
+
 class Covariance
 {
     /**
@@ -10,7 +13,7 @@ class Covariance
      *
      * @param array $x
      * @param array $y
-     * @param bool $sample
+     * @param bool  $sample
      * @param float $meanX
      * @param float $meanY
      *
@@ -18,57 +21,72 @@ class Covariance
      *
      * @throws InvalidArgumentException
      */
-    public static function fromXYArrays(array $x, array $y, $sample = true, $meanX = null, $meanY = null)
+    public static function fromXYArrays(array $x, array $y, $sample = true, float $meanX = null, float $meanY = null)
     {
         if (empty($x) || empty($y)) {
             throw InvalidArgumentException::arrayCantBeEmpty();
         }
+
         $n = count($x);
         if ($sample && $n === 1) {
             throw InvalidArgumentException::arraySizeToSmall(2);
         }
+
         if ($meanX === null) {
             $meanX = Mean::arithmetic($x);
         }
+
         if ($meanY === null) {
             $meanY = Mean::arithmetic($y);
         }
+
         $sum = 0.0;
         foreach ($x as $index => $xi) {
             $yi = $y[$index];
             $sum += ($xi - $meanX) * ($yi - $meanY);
         }
+
         if ($sample) {
             --$n;
         }
+
         return $sum / $n;
     }
+
     /**
      * Calculates covariance of two dimensions, i and k in the given data.
      *
      * @param array $data
-     * @param int $i
-     * @param int $k
-     * @param type $sample
-     * @param int $n
+     * @param int   $i
+     * @param int   $k
+     * @param bool  $sample
      * @param float $meanX
      * @param float $meanY
+     *
+     * @return float
+     *
+     * @throws InvalidArgumentException
+     * @throws \Exception
      */
-    public static function fromDataset(array $data, $i, $k, $sample = true, $meanX = null, $meanY = null)
+    public static function fromDataset(array $data, int $i, int $k, bool $sample = true, float $meanX = null, float $meanY = null)
     {
         if (empty($data)) {
             throw InvalidArgumentException::arrayCantBeEmpty();
         }
+
         $n = count($data);
         if ($sample && $n === 1) {
             throw InvalidArgumentException::arraySizeToSmall(2);
         }
+
         if ($i < 0 || $k < 0 || $i >= $n || $k >= $n) {
             throw new \Exception("Given indices i and k do not match with the dimensionality of data");
         }
+
         if ($meanX === null || $meanY === null) {
             $x = array_column($data, $i);
             $y = array_column($data, $k);
+
             $meanX = Mean::arithmetic($x);
             $meanY = Mean::arithmetic($y);
             $sum = 0.0;
@@ -98,37 +116,46 @@ class Covariance
                 $sum += $val[0] * $val[1];
             }
         }
+
         if ($sample) {
             --$n;
         }
+
         return $sum / $n;
     }
+
     /**
      * Returns the covariance matrix of n-dimensional data
      *
-     * @param array $data
+     * @param array      $data
+     * @param array|null $means
      *
      * @return array
      */
     public static function covarianceMatrix(array $data, array $means = null)
     {
         $n = count($data[0]);
+
         if ($means === null) {
             $means = [];
-            for ($i = 0; $i < $n; $i++) {
+            for ($i = 0; $i < $n; ++$i) {
                 $means[] = Mean::arithmetic(array_column($data, $i));
             }
         }
+
         $cov = [];
-        for ($i = 0; $i < $n; $i++) {
-            for ($k = 0; $k < $n; $k++) {
+        for ($i = 0; $i < $n; ++$i) {
+            for ($k = 0; $k < $n; ++$k) {
                 if ($i > $k) {
                     $cov[$i][$k] = $cov[$k][$i];
                 } else {
-                    $cov[$i][$k] = Covariance::fromDataset($data, $i, $k, true, $means[$i], $means[$k]);
+                    $cov[$i][$k] = self::fromDataset(
+                        $data, $i, $k, true, $means[$i], $means[$k]
+                    );
                 }
             }
         }
+
         return $cov;
     }
 }

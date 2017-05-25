@@ -18,8 +18,8 @@ class RBF implements Kernel
         $this->gamma = $gamma;
     }
     /**
-     * @param float $a
-     * @param float $b
+     * @param array $a
+     * @param array $b
      *
      * @return float
      */

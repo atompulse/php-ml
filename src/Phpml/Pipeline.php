@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phpml;
 
 class Pipeline implements Estimator
@@ -8,10 +10,12 @@ class Pipeline implements Estimator
      * @var array|Transformer[]
      */
     private $transformers;
+
     /**
      * @var Estimator
      */
     private $estimator;
+
     /**
      * @param array|Transformer[] $transformers
      * @param Estimator           $estimator
@@ -21,8 +25,10 @@ class Pipeline implements Estimator
         foreach ($transformers as $transformer) {
             $this->addTransformer($transformer);
         }
+
         $this->estimator = $estimator;
     }
+
     /**
      * @param Transformer $transformer
      */
@@ -30,6 +36,7 @@ class Pipeline implements Estimator
     {
         $this->transformers[] = $transformer;
     }
+
     /**
      * @param Estimator $estimator
      */
@@ -37,6 +44,7 @@ class Pipeline implements Estimator
     {
         $this->estimator = $estimator;
     }
+
     /**
      * @return array|Transformer[]
      */
@@ -44,6 +52,7 @@ class Pipeline implements Estimator
     {
         return $this->transformers;
     }
+
     /**
      * @return Estimator
      */
@@ -51,16 +60,21 @@ class Pipeline implements Estimator
     {
         return $this->estimator;
     }
+
     /**
      * @param array $samples
      * @param array $targets
      */
     public function train(array $samples, array $targets)
     {
-        $this->fitTransformers($samples);
-        $this->transformSamples($samples);
+        foreach ($this->transformers as $transformer) {
+            $transformer->fit($samples);
+            $transformer->transform($samples);
+        }
+
         $this->estimator->train($samples, $targets);
     }
+
     /**
      * @param array $samples
      *
@@ -69,17 +83,10 @@ class Pipeline implements Estimator
     public function predict(array $samples)
     {
         $this->transformSamples($samples);
+
         return $this->estimator->predict($samples);
     }
-    /**
-     * @param array $samples
-     */
-    private function fitTransformers(array &$samples)
-    {
-        foreach ($this->transformers as $transformer) {
-            $transformer->fit($samples);
-        }
-    }
+
     /**
      * @param array $samples
      */

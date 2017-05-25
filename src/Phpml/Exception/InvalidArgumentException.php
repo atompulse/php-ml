@@ -9,7 +9,7 @@ class InvalidArgumentException extends \Exception
      */
     public static function arraySizeNotMatch()
     {
-        return new self('Size of given arrays not match');
+        return new self('Size of given arrays does not match');
     }
     /**
      * @param $name
@@ -48,7 +48,7 @@ class InvalidArgumentException extends \Exception
      */
     public static function inconsistentMatrixSupplied()
     {
-        return new self('Inconsistent matrix applied');
+        return new self('Inconsistent matrix supplied');
     }
     /**
      * @return InvalidArgumentException
@@ -57,6 +57,14 @@ class InvalidArgumentException extends \Exception
     {
         return new self('Invalid clusters number');
     }
+    /**
+     * @return InvalidArgumentException
+     */
+    public static function invalidTarget($target)
+    {
+        return new self('Target with value ' . $target . ' is not part of the accepted classes');
+    }
+
     /**
      * @param string $language
      *
@@ -78,6 +86,19 @@ class InvalidArgumentException extends \Exception
      */
     public static function invalidLayersNumber()
     {
-        return new self('Provide at least 2 layers: 1 input and 1 output');
+        return new self('Provide at least 1 hidden layer');
+    }
+
+    /**
+     * @return InvalidArgumentException
+     */
+    public static function invalidClassesNumber()
+    {
+        return new self('Provide at least 2 different classes');
+    }
+
+    public static function inconsistentClasses()
+    {
+        return new self('The provided classes don\'t match the classes provided in the constructor');
     }
 }
