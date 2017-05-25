@@ -1,37 +1,30 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\NeuralNetwork\Training;
 
 use Phpml\NeuralNetwork\Node\Neuron;
 use Phpml\NeuralNetwork\Training\Backpropagation\Sigma;
-
 class Backpropagation
 {
     /**
      * @var int
      */
     private $theta;
-
     /**
      * @var array
      */
     private $sigmas = null;
-
     /**
      * @var array
      */
     private $prevSigmas = null;
-
     /**
      * @param int $theta
      */
-    public function __construct(int $theta)
+    public function __construct($theta)
     {
         $this->theta = $theta;
     }
-
     /**
      * @param array $layers
      * @param mixed $targetClass
@@ -39,7 +32,6 @@ class Backpropagation
     public function backpropagate(array $layers, $targetClass)
     {
         $layersNumber = count($layers);
-
         // Backpropagation.
         for ($i = $layersNumber; $i > 1; --$i) {
             $this->sigmas = [];
@@ -53,12 +45,10 @@ class Backpropagation
             }
             $this->prevSigmas = $this->sigmas;
         }
-
         // Clean some memory (also it helps make MLP persistency & children more maintainable).
         $this->sigmas = null;
         $this->prevSigmas = null;
     }
-
     /**
      * @param Neuron $neuron
      * @param int    $targetClass
@@ -67,39 +57,33 @@ class Backpropagation
      *
      * @return float
      */
-    private function getSigma(Neuron $neuron, int $targetClass, int $key, bool $lastLayer): float
+    private function getSigma(Neuron $neuron, $targetClass, $key, $lastLayer)
     {
         $neuronOutput = $neuron->getOutput();
         $sigma = $neuronOutput * (1 - $neuronOutput);
-
         if ($lastLayer) {
             $value = 0;
             if ($targetClass === $key) {
                 $value = 1;
             }
-            $sigma *= ($value - $neuronOutput);
+            $sigma *= $value - $neuronOutput;
         } else {
             $sigma *= $this->getPrevSigma($neuron);
         }
-
         $this->sigmas[] = new Sigma($neuron, $sigma);
-
         return $sigma;
     }
-
     /**
      * @param Neuron $neuron
      *
      * @return float
      */
-    private function getPrevSigma(Neuron $neuron): float
+    private function getPrevSigma(Neuron $neuron)
     {
         $sigma = 0.0;
-
         foreach ($this->prevSigmas as $neuronSigma) {
             $sigma += $neuronSigma->getSigmaForNeuron($neuron);
         }
-
         return $sigma;
     }
 }

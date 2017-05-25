@@ -1,6 +1,5 @@
 <?php
 
-declare(strict_types=1);
 /**
  *	@package JAMA
  *
@@ -24,12 +23,10 @@ declare(strict_types=1);
  *  @date 2017/04/24
  *  @author Mustafa Karabulut
  */
-
 namespace Phpml\Math\LinearAlgebra;
 
 use Phpml\Math\Matrix;
 use Phpml\Exception\MatrixException;
-
 class LUDecomposition
 {
     /**
@@ -37,32 +34,26 @@ class LUDecomposition
      *	@var array
      */
     private $LU = [];
-
     /**
      *	Row dimension.
      *	@var int
      */
     private $m;
-
     /**
      *	Column dimension.
      *	@var int
      */
     private $n;
-
     /**
      *	Pivot sign.
      *	@var int
      */
     private $pivsign;
-
     /**
      *	Internal storage of pivot vector.
      *	@var array
      */
     private $piv = [];
-
-
     /**
      * Constructs Structure to access L, U and piv.
      *
@@ -75,22 +66,20 @@ class LUDecomposition
         if ($A->getRows() != $A->getColumns()) {
             throw MatrixException::notSquareMatrix();
         }
-
         // Use a "left-looking", dot-product, Crout/Doolittle algorithm.
         $this->LU = $A->toArray();
-        $this->m  = $A->getRows();
-        $this->n  = $A->getColumns();
+        $this->m = $A->getRows();
+        $this->n = $A->getColumns();
         for ($i = 0; $i < $this->m; ++$i) {
             $this->piv[$i] = $i;
         }
         $this->pivsign = 1;
         $LUcolj = [];
-
         // Outer loop.
         for ($j = 0; $j < $this->n; ++$j) {
             // Make a copy of the j-th column to localize references.
             for ($i = 0; $i < $this->m; ++$i) {
-                $LUcolj[$i] = &$this->LU[$i][$j];
+                $LUcolj[$i] =& $this->LU[$i][$j];
             }
             // Apply previous transformations.
             for ($i = 0; $i < $this->m; ++$i) {
@@ -122,15 +111,14 @@ class LUDecomposition
                 $this->pivsign = $this->pivsign * -1;
             }
             // Compute multipliers.
-            if (($j < $this->m) && ($this->LU[$j][$j] != 0.0)) {
+            if ($j < $this->m && $this->LU[$j][$j] != 0.0) {
                 for ($i = $j + 1; $i < $this->m; ++$i) {
                     $this->LU[$i][$j] /= $this->LU[$j][$j];
                 }
             }
         }
-    }    //	function __construct()
-
-
+    }
+    //	function __construct()
     /**
      * Get lower triangular factor.
      *
@@ -151,9 +139,8 @@ class LUDecomposition
             }
         }
         return new Matrix($L);
-    }    //	function getL()
-
-
+    }
+    //	function getL()
     /**
      * Get upper triangular factor.
      *
@@ -172,9 +159,8 @@ class LUDecomposition
             }
         }
         return new Matrix($U);
-    }    //	function getU()
-
-
+    }
+    //	function getU()
     /**
      * Return pivot permutation vector.
      *
@@ -183,9 +169,8 @@ class LUDecomposition
     public function getPivot()
     {
         return $this->piv;
-    }    //	function getPivot()
-
-
+    }
+    //	function getPivot()
     /**
      * Alias for getPivot
      *
@@ -194,9 +179,8 @@ class LUDecomposition
     public function getDoublePivot()
     {
         return $this->getPivot();
-    }    //	function getDoublePivot()
-
-
+    }
+    //	function getDoublePivot()
     /**
      * Is the matrix nonsingular?
      *
@@ -209,11 +193,9 @@ class LUDecomposition
                 return false;
             }
         }
-
         return true;
-    }    //	function isNonsingular()
-
-
+    }
+    //	function isNonsingular()
     /**
      * Count determinants
      *
@@ -226,16 +208,13 @@ class LUDecomposition
         if ($this->m !== $this->n) {
             throw MatrixException::notSquareMatrix();
         }
-
         $d = $this->pivsign;
         for ($j = 0; $j < $this->n; ++$j) {
             $d *= $this->LU[$j][$j];
         }
-
         return $d;
-    }    //	function det()
-
-
+    }
+    //	function det()
     /**
      * Solve A*X = B
      *
@@ -250,14 +229,12 @@ class LUDecomposition
         if ($B->getRows() != $this->m) {
             throw MatrixException::notSquareMatrix();
         }
-
         if (!$this->isNonsingular()) {
             throw MatrixException::singularMatrix();
         }
-
         // Copy right hand side with pivoting
         $nx = $B->getColumns();
-        $X  = $this->getSubMatrix($B->toArray(), $this->piv, 0, $nx - 1);
+        $X = $this->getSubMatrix($B->toArray(), $this->piv, 0, $nx - 1);
         // Solve L*Y = B(piv,:)
         for ($k = 0; $k < $this->n; ++$k) {
             for ($i = $k + 1; $i < $this->n; ++$i) {
@@ -278,8 +255,8 @@ class LUDecomposition
             }
         }
         return $X;
-    }    //	function solve()
-
+    }
+    //	function solve()
     /**
      * @param array $matrix
      * @param array $RL
@@ -288,18 +265,17 @@ class LUDecomposition
      *
      * @return array
      */
-    protected function getSubMatrix(array $matrix, array $RL, int $j0, int $jF)
+    protected function getSubMatrix(array $matrix, array $RL, $j0, $jF)
     {
         $m = count($RL);
         $n = $jF - $j0;
         $R = array_fill(0, $m, array_fill(0, $n + 1, 0.0));
-
         for ($i = 0; $i < $m; ++$i) {
             for ($j = $j0; $j <= $jF; ++$j) {
                 $R[$i][$j - $j0] = $matrix[$RL[$i]][$j];
             }
         }
-
         return $R;
     }
-}    //	class LUDecomposition
+}
+//	class LUDecomposition

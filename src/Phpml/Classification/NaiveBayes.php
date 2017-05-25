@@ -1,62 +1,49 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\Classification;
 
 use Phpml\Helper\Predictable;
 use Phpml\Helper\Trainable;
 use Phpml\Math\Statistic\Mean;
 use Phpml\Math\Statistic\StandardDeviation;
-
 class NaiveBayes implements Classifier
 {
     use Trainable, Predictable;
-
-    const CONTINUOS    = 1;
-    const NOMINAL    = 2;
-    const EPSILON = 1e-10;
-
+    const CONTINUOS = 1;
+    const NOMINAL = 2;
+    const EPSILON = 1.0E-10;
     /**
      * @var array
      */
     private $std = [];
-
     /**
      * @var array
      */
-    private $mean= [];
-
+    private $mean = [];
     /**
      * @var array
      */
     private $discreteProb = [];
-
     /**
      * @var array
      */
     private $dataType = [];
-
     /**
      * @var array
      */
     private $p = [];
-
     /**
      * @var int
      */
     private $sampleCount = 0;
-
     /**
      * @var int
      */
     private $featureCount = 0;
-
     /**
      * @var array
      */
     private $labels = [];
-
     /**
      * @param array $samples
      * @param array $targets
@@ -67,7 +54,6 @@ class NaiveBayes implements Classifier
         $this->targets = array_merge($this->targets, $targets);
         $this->sampleCount = count($this->samples);
         $this->featureCount = count($this->samples[0]);
-
         $labelCounts = array_count_values($this->targets);
         $this->labels = array_keys($labelCounts);
         foreach ($this->labels as $label) {
@@ -76,7 +62,6 @@ class NaiveBayes implements Classifier
             $this->calculateStatistics($label, $samples);
         }
     }
-
     /**
      * Calculates vital statistics for each label & feature. Stores these
      * values in private array in order to avoid repeated calculation
@@ -86,7 +71,7 @@ class NaiveBayes implements Classifier
     private function calculateStatistics($label, $samples)
     {
         $this->std[$label] = array_fill(0, $this->featureCount, 0);
-        $this->mean[$label]= array_fill(0, $this->featureCount, 0);
+        $this->mean[$label] = array_fill(0, $this->featureCount, 0);
         $this->dataType[$label] = array_fill(0, $this->featureCount, self::CONTINUOS);
         $this->discreteProb[$label] = array_fill(0, $this->featureCount, self::CONTINUOS);
         for ($i = 0; $i < $this->featureCount; ++$i) {
@@ -99,18 +84,17 @@ class NaiveBayes implements Classifier
             if ($values !== array_filter($values, 'is_numeric')) {
                 $this->dataType[$label][$i] = self::NOMINAL;
                 $this->discreteProb[$label][$i] = array_count_values($values);
-                $db = &$this->discreteProb[$label][$i];
-                $db = array_map(function ($el) use ($numValues) {
+                $db =& $this->discreteProb[$label][$i];
+                $db = array_map(function ($el) use($numValues) {
                     return $el / $numValues;
                 }, $db);
             } else {
                 $this->mean[$label][$i] = Mean::arithmetic($values);
                 // Add epsilon in order to avoid zero stdev
-                $this->std[$label][$i] = 1e-10 + StandardDeviation::population($values, false);
+                $this->std[$label][$i] = 1.0E-10 + StandardDeviation::population($values, false);
             }
         }
     }
-
     /**
      * Calculates the probability P(label|sample_n)
      *
@@ -124,14 +108,13 @@ class NaiveBayes implements Classifier
     {
         $value = $sample[$feature];
         if ($this->dataType[$label][$feature] == self::NOMINAL) {
-            if (!isset($this->discreteProb[$label][$feature][$value]) ||
-                $this->discreteProb[$label][$feature][$value] == 0) {
+            if (!isset($this->discreteProb[$label][$feature][$value]) || $this->discreteProb[$label][$feature][$value] == 0) {
                 return self::EPSILON;
             }
             return $this->discreteProb[$label][$feature][$value];
         }
-        $std = $this->std[$label][$feature] ;
-        $mean= $this->mean[$label][$feature];
+        $std = $this->std[$label][$feature];
+        $mean = $this->mean[$label][$feature];
         // Calculate the probability density by use of normal/Gaussian distribution
         // Ref: https://en.wikipedia.org/wiki/Normal_distribution
         //
@@ -139,11 +122,10 @@ class NaiveBayes implements Classifier
         // some libraries adopt taking log of calculations such as
         // scikit-learn did.
         // (See : https://github.com/scikit-learn/scikit-learn/blob/master/sklearn/naive_bayes.py)
-        $pdf  =  -0.5 * log(2.0 * pi() * $std * $std);
+        $pdf = -0.5 * log(2.0 * pi() * $std * $std);
         $pdf -= 0.5 * pow($value - $mean, 2) / ($std * $std);
         return $pdf;
     }
-
     /**
      * Return samples belonging to specific label
      *
@@ -161,7 +143,6 @@ class NaiveBayes implements Classifier
         }
         return $samples;
     }
-
     /**
      * @param array $sample
      * @return mixed
@@ -174,13 +155,12 @@ class NaiveBayes implements Classifier
         $predictions = [];
         foreach ($this->labels as $label) {
             $p = $this->p[$label];
-            for ($i = 0; $i<$this->featureCount; ++$i) {
+            for ($i = 0; $i < $this->featureCount; ++$i) {
                 $Plf = $this->sampleProbability($sample, $i, $label);
                 $p += $Plf;
             }
             $predictions[$label] = $p;
         }
-
         arsort($predictions, SORT_NUMERIC);
         reset($predictions);
         return key($predictions);

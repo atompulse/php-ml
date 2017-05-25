@@ -1,30 +1,24 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Phpml\NeuralNetwork\Node;
 
 use Phpml\NeuralNetwork\ActivationFunction;
 use Phpml\NeuralNetwork\Node\Neuron\Synapse;
 use Phpml\NeuralNetwork\Node;
-
 class Neuron implements Node
 {
     /**
      * @var Synapse[]
      */
     protected $synapses;
-
     /**
      * @var ActivationFunction
      */
     protected $activationFunction;
-
     /**
      * @var float
      */
     protected $output;
-
     /**
      * @param ActivationFunction|null $activationFunction
      */
@@ -34,7 +28,6 @@ class Neuron implements Node
         $this->synapses = [];
         $this->output = 0;
     }
-
     /**
      * @param Synapse $synapse
      */
@@ -42,7 +35,6 @@ class Neuron implements Node
     {
         $this->synapses[] = $synapse;
     }
-
     /**
      * @return Synapse[]
      */
@@ -50,24 +42,20 @@ class Neuron implements Node
     {
         return $this->synapses;
     }
-
     /**
      * @return float
      */
-    public function getOutput(): float
+    public function getOutput()
     {
         if (0 === $this->output) {
             $sum = 0;
             foreach ($this->synapses as $synapse) {
                 $sum += $synapse->getOutput();
             }
-
             $this->output = $this->activationFunction->compute($sum);
         }
-
         return $this->output;
     }
-
     public function reset()
     {
         $this->output = 0;

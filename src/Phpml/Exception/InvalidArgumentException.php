@@ -64,7 +64,6 @@ class InvalidArgumentException extends \Exception
     {
         return new self('Target with value ' . $target . ' is not part of the accepted classes');
     }
-
     /**
      * @param string $language
      *
@@ -88,7 +87,6 @@ class InvalidArgumentException extends \Exception
     {
         return new self('Provide at least 1 hidden layer');
     }
-
     /**
      * @return InvalidArgumentException
      */
@@ -96,7 +94,6 @@ class InvalidArgumentException extends \Exception
     {
         return new self('Provide at least 2 different classes');
     }
-
     public static function inconsistentClasses()
     {
         return new self('The provided classes don\'t match the classes provided in the constructor');

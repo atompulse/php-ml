@@ -14,7 +14,6 @@ trait Predictable
         if (!is_array($samples[0])) {
             return $this->predictSample($samples);
         }
-
         $predicted = [];
         foreach ($samples as $index => $sample) {
             $predicted[$index] = $this->predictSample($sample);

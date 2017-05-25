@@ -131,11 +131,9 @@ class Space extends SplObjectStorage
             case KMeans::INIT_KMEANS_PLUS_PLUS:
                 $clusters = $this->initializeKMPPClusters($clustersNumber);
                 break;
-
             default:
                 return [];
         }
-
         $clusters[0]->attachAll($this);
         return $clusters;
     }

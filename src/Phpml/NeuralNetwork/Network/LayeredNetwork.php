@@ -33,7 +33,6 @@ abstract class LayeredNetwork implements Network
     {
         unset($this->layers);
     }
-
     /**
      * @return Layer
      */
