@@ -38,10 +38,6 @@ class Bagging implements Classifier
      */
     protected $subsetRatio = 0.7;
     /**
-     * @var array
-     */
-    private $samples = [];
-    /**
      * Creates an ensemble classifier with given number of base classifiers
      * Default number of base classifiers is 50.
      * The more number of base classifiers, the better performance but at the cost of procesing time
